@@ -51,6 +51,7 @@ def spectrogram_torch(y, n_fft, sampling_rate, hop_size, win_size, center=False)
     
     y = torch.nn.functional.pad(y.unsqueeze(1), (int((n_fft-hop_size)/2), int((n_fft-hop_size)/2)), mode='reflect')
     y = y.squeeze(1)
+    y = y.float() # torch.stft doesn't support bfloat16
 
     spec = torch.stft(
         y,
@@ -63,7 +64,8 @@ def spectrogram_torch(y, n_fft, sampling_rate, hop_size, win_size, center=False)
         normalized=False,
         onesided=True,
         return_complex=False
-    )
+    ).to(torch.bfloat16)
+    
     spec = torch.sqrt(spec.pow(2).sum(-1) + 1e-6)
     return spec
 
@@ -115,6 +117,7 @@ def mel_spectrogram_torch(y, n_fft, num_mels, sampling_rate, hop_size, win_size,
 
     y = torch.nn.functional.pad(y.unsqueeze(1), (int((n_fft-hop_size)/2), int((n_fft-hop_size)/2)), mode='reflect')
     y = y.squeeze(1)
+    y = y.float() # torch.stft doesn't support bfloat16
 
     spec = torch.stft(
         y, n_fft,
@@ -126,7 +129,8 @@ def mel_spectrogram_torch(y, n_fft, num_mels, sampling_rate, hop_size, win_size,
         normalized=False,
         onesided=True,
         return_complex=False
-    )
+    ).to(torch.bfloat16)
+
     spec = torch.sqrt(spec.pow(2).sum(-1) + 1e-6)
     spec = torch.matmul(mel_basis[fmax_dtype_device], spec)
     spec = spectral_normalize_torch(spec)
