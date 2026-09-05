@@ -181,10 +181,7 @@ class EFTS2(nn.Module):
 
     z_slice, ids_slice = commons.rand_slice_segments(z2, y_lengths, self.segment_size)
 
-    if self.ms_istft_vits == True:
-      o, _ = self.dec(z_slice, g=g)
-    else:
-      o = self.dec(z_slice, g=g)
+    o = self.dec(z_slice, g=g)
 
     z1_r, m_q1, logs_q1, y_mask = self.prior_nn1(x_align, y_mask, g=g)
     _, m_q2, logs_q2, y_mask = self.prior_nn2(z1, y_mask, g=g)
